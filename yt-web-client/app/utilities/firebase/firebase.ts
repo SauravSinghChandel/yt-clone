@@ -10,24 +10,23 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyAMb-0vQ_LeQuvgeUrtnywKAsejqWN0pCw",
-    authDomain: "jb-yt-clone.firebaseapp.com",
-    projectId: "jb-yt-clone",
-    appId: "1:257328270603:web:e5f23cf697f9393dc6260e",
-    measurementId: "G-HLVK14ZZ7B"
+  apiKey: process.env.NEXT_PUBLIC_YT_CLONE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_YT_CLONE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_YT_CLONE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_YT_CLONE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_YT_CLONE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 /**
  * Signs the user in with a Google popup.
  * @returns A promise that resolves with the user's credentials.
  */
-export function signInWithGoogle() {
-    return signInWithPopup(auth, new GoogleAuthProvider());
+export async function signInWithGoogle() {
+    return await signInWithPopup(auth, new GoogleAuthProvider());
 }
 
 /**
