@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from "firebase/auth";
 
 
@@ -40,7 +39,4 @@ export function signOut() {
 /**
  * Trigger a callback when user auth state changes.
  * @returns A function to unsubscribe callback.
- */
-export function onAuthStateChangedHelper(callback: (user: User | null) => void) {
-    return onAuthStateChanged(auth, callback)
 }
