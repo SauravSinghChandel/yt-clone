@@ -8,31 +8,58 @@
  */
 /* eslint-disable */
 import * as logger from "firebase-functions/logger";
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v2";
 import { initializeApp } from "firebase-admin/app";
-import { Firestore } from "firebase-admin/firestore";
-import { Storage } from "@google-cloud/storage";
+//import { Firestore } from "firebase-admin/firestore";
+//import { Storage } from "@google-cloud/storage";
 import { onCall } from "firebase-functions/v2/https";
+import { getFirestore } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
+import { beforeUserCreated } from "firebase-functions/v2/identity";
 
 initializeApp();
 
-const firestore = new Firestore();
+const firestore = getFirestore();
 
-const storage = new Storage();
+const storage = getStorage();
 
 const rawVideoBucketName = "jb527-yt-raw-videos";
 
-export const createUser = functions.auth.user().onCreate((user) => {
+const videoCollectionId = "videos";
+
+export interface Video {
+    id?: string,
+    uid?: string,
+    filename?: string,
+    status?: "processing" | "processed",
+    title?: string,
+    description?: string,
+}
+
+export const createUser = beforeUserCreated(async (event) => {
+    const user = event.data;
     const userInfo = {
         uid: user.uid,
         email: user.email,
         photoUrl: user.photoURL,
     };
+    
+    console.log(event)
+    console.log(userInfo)
 
-    firestore.collection("users").doc(user.uid).set(userInfo);
-    logger.info(`User Created: ${JSON.stringify(userInfo)}`);
-    return;
+    try {
+        
+        await firestore.collection("users").doc(user.uid).set(userInfo)
+        logger.info("User created successfully");
+        logger.info(`User Created: ${JSON.stringify(userInfo)}`);
+
+    } catch (err) {
+        logger.error(`Error creating user: ${err}`);
+        throw new Error("Failed to create user document")
+    };
 });
+
+
 
 export const generateUploadUrl = onCall({maxInstances: 1}, async (request) => {
     // Check if the user is authenticated
@@ -62,3 +89,10 @@ export const generateUploadUrl = onCall({maxInstances: 1}, async (request) => {
 
     return { url, fileName };
 });
+
+export const getVideos = onCall({maxInstances: 1}, async () => {
+    const querySnapshot = await firestore.collection(videoCollectionId).limit(10).get();
+
+    return querySnapshot.docs.map((doc) => doc.data());
+
+})
